@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: payment-pvc
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: payment-service
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

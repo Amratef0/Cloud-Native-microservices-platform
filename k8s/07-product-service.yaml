@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-search-service
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: product-search-service
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-search-service
+  template:
+    metadata:
+      labels:
+        app: product-search-service
+    spec:
+      containers:
+        - name: product-search-service
+          image: judyassem0/rowad-product-search-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5002
+              name: http
+          env:
+            - name: PORT
+              value: "5002"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017"
+            - name: DB_NAME
+              value: "ecommerce_products_db"
+            - name: DEBUG
+              value: "False"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-search-service
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: product-search-service
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+spec:
+  type: ClusterIP
+  selector:
+    app: product-search-service
+  ports:
+    - name: http
+      port: 5002
+      targetPort: 5002

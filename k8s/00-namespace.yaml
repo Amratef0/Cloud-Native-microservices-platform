@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: rowad-ecommerce
+    app.kubernetes.io/part-of: rowad-ecommerce-platform

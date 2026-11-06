@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: cart-service
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: judyassem0/rowad-cart-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5004
+              name: http
+          env:
+            - name: PORT
+              value: "5004"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: NODE_ENV
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: jwt-secret
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017/ecommerce_cart_db"
+            - name: PRODUCT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: PRODUCT_SERVICE_URL
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5004
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5004
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: cart-service
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+spec:
+  type: ClusterIP
+  selector:
+    app: cart-service
+  ports:
+    - name: http
+      port: 5004
+      targetPort: 5004

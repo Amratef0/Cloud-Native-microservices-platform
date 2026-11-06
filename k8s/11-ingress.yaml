@@ -1,0 +1,81 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ecommerce-ingress
+  namespace: rowad-ecommerce
+  labels:
+    app.kubernetes.io/name: rowad-ecommerce
+    app.kubernetes.io/part-of: rowad-ecommerce-platform
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # Increase proxy timeouts for microservice processing
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Frontend static storefront & SPA routes
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+          # Auth & User Service
+          - path: /api/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-user-service
+                port:
+                  number: 5001
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-user-service
+                port:
+                  number: 5001
+          # Product & Search Service
+          - path: /api/products
+            pathType: Prefix
+            backend:
+              service:
+                name: product-search-service
+                port:
+                  number: 5002
+          - path: /api/categories
+            pathType: Prefix
+            backend:
+              service:
+                name: product-search-service
+                port:
+                  number: 5002
+          # Payment Service
+          - path: /api/payment
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 5003
+          # Cart Service
+          - path: /api/cart
+            pathType: Prefix
+            backend:
+              service:
+                name: cart-service
+                port:
+                  number: 5004
+          # Order Service
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 5005
