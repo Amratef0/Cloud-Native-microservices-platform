@@ -1,0 +1,35 @@
+- name: Prepare Rowad server
+  hosts: rowad
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install Docker and basic tools
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - curl
+          - git
+        state: present
+
+    - name: Start and enable Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add ubuntu user to docker group
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: true
+
+    - name: Install k3s
+      ansible.builtin.shell: >
+        curl -sfL https://get.k3s.io |
+        INSTALL_K3S_EXEC="--write-kubeconfig-mode 644 --tls-san {{ inventory_hostname }}" sh -
+      args:
+        creates: /usr/local/bin/k3s
