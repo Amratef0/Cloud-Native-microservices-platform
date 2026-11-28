@@ -16,6 +16,13 @@ spec:
       labels:
         app: cart-service
     spec:
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z mongo 27017; do echo "waiting for mongo..."; sleep 2; done
       containers:
         - name: cart-service
           image: judyassem0/rowad-cart-service:latest
